@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>今天吃什麼</title>
+  <style>
+    :root {
+      --bg: #f3eee6;
+      --ink: #241c18;
+      --muted: #6b615a;
+      --line: #e6dbd0;
+      --card: #fffdfb;
+      --accent: #a33c12;
+      --accent-dark: #862f0d;
+      --soft: #fff4ec;
+      --danger: #9f1239;
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 420px at 50% -120px, #ffe8d4 0%, transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; touch-action: manipulation; }
+
+    button { cursor: pointer; }
+
+    button:disabled { cursor: default; opacity: 0.62; }
+
+    :focus-visible {
+      outline: 3px solid #e7a27a;
+      outline-offset: 2px;
+    }
+
+    .wrap {
+      width: min(34rem, calc(100% - 2rem));
+      margin-inline: auto;
+      padding-block: 1.75rem 2.75rem;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+
+    h1::before {
+      content: "";
+      width: 0.72rem;
+      height: 0.72rem;
+      border-radius: 0.22rem;
+      background: var(--accent);
+      flex: none;
+    }
+
+    .lede {
+      margin: 0.6rem 0 0;
+      color: var(--muted);
+    }
+
+    header { margin-bottom: 1.4rem; }
+
+    .field-label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+      color: inherit;
+    }
+
+    input::placeholder { color: #a39890; }
+
+    .add-btn,
+    .btn,
+    .btn-accent,
+    .btn-primary,
+    .clear-btn {
+      border-radius: 12px;
+    }
+
+    .add-btn {
+      flex: none;
+      min-height: 48px;
+      padding: 0 1.05rem;
+      border: none;
+      background: var(--ink);
+      color: white;
+      font-weight: 700;
+    }
+
+    .add-btn:hover { background: #3a2e28; }
+
+    .form-error {
+      min-height: 1.45rem;
+      margin: 0.4rem 0 0;
+      color: var(--danger);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .list-section { margin-top: 1.15rem; }
+
+    h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .list-summary {
+      margin: 0.2rem 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .list {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .item {
+      padding: 0.85rem 0.9rem;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      background: var(--card);
+    }
+
+    .item.is-skip {
+      border-left-color: #cfc6bd;
+      background: #f6f3ef;
+    }
+
+    .item-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem 0.5rem;
+    }
+
+    .name {
+      margin: 0;
+      flex: 1 1 8rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .item.is-skip .name { color: #6d645d; }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .badge-skip {
+      background: #e8e2db;
+      color: #4e463f;
+    }
+
+    .badge-eaten {
+      background: #fde6d6;
+      color: #8a3412;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.7rem;
+    }
+
+    .btn {
+      flex: 1;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .btn:hover { background: #faf7f4; }
+
+    .skip-btn[aria-pressed="true"] {
+      background: #e7e0d8;
+      border-color: #d5cbc0;
+      color: #3f3833;
+    }
+
+    .picker { margin-top: 1.35rem; }
+
+    .notice {
+      margin: 0;
+      padding: 0.95rem 1rem;
+      text-align: center;
+      color: #5c534c;
+      background: white;
+      border: 1px dashed #e0d5c8;
+      border-radius: 14px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      min-height: 56px;
+      border: none;
+      border-radius: 16px;
+      background: var(--accent);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: 0 10px 24px rgba(163, 60, 18, 0.28);
+    }
+
+    .btn-primary:hover { background: var(--accent-dark); }
+
+    .btn-primary:active { transform: translateY(1px); }
+
+    .result {
+      margin-top: 1rem;
+      padding: 1.35rem 1.1rem 1.15rem;
+      text-align: center;
+      border: 2px solid #f0c2a4;
+      border-radius: 20px;
+      background:
+        radial-gradient(120% 90% at 50% -20%, #ffe8d6 0%, #fff8f3 46%, #fffdfb 100%);
+      box-shadow: 0 16px 40px rgba(163, 60, 18, 0.12);
+    }
+
+    .result-kicker {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .result-name {
+      margin: 0.35rem 0 0;
+      font-size: clamp(2.1rem, 10vw, 3.3rem);
+      font-weight: 900;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .result-note {
+      margin: 0.55rem 0 0;
+      color: #7a4b32;
+      font-weight: 700;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-accent {
+      flex: 1;
+      min-height: 48px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+    }
+
+    .btn-accent:hover { background: var(--accent-dark); }
+
+    .result-actions .btn { flex: 1; min-height: 48px; }
+
+    .clear-btn {
+      width: 100%;
+      margin-top: 1.8rem;
+      min-height: 44px;
+      border: 1px dashed #ddd3c8;
+      background: transparent;
+      color: #7a6e66;
+      font-weight: 700;
+    }
+
+    .clear-btn:hover {
+      color: var(--danger);
+      background: #fff7f7;
+      border-color: #f0c9d2;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+    }
+
+    .shake { animation: shake 0.28s ease; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .is-fresh { animation: rise 0.28s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .shake, .is-fresh { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>今天吃什麼</h1>
+      <p class="lede">把店名或菜名加進來，從還想吃的選項裡決定一餐。</p>
+    </header>
+
+    <form id="add-form">
+      <label class="field-label" for="name">店名或菜名</label>
+      <div class="add-row" id="add-row">
+        <input id="name" type="text" maxlength="60" placeholder="例如：牛肉麵、壽司" autocomplete="off" enterkeyhint="done" aria-describedby="form-error">
+        <button class="add-btn" type="submit">加入</button>
+      </div>
+      <p id="form-error" class="form-error" role="alert"></p>
+    </form>
+
+    <section id="list-section" class="list-section" aria-labelledby="list-heading" hidden>
+      <h2 id="list-heading">目前的選項</h2>
+      <p id="list-summary" class="list-summary"></p>
+      <ul id="list" class="list"></ul>
+    </section>
+
+    <div class="picker">
+      <p id="picker-note" class="notice" role="status">先加入至少一個選項</p>
+      <button id="decide" class="btn-primary" type="button" hidden>幫我決定</button>
+    </div>
+
+    <section id="result" class="result" hidden>
+      <p id="result-kicker" class="result-kicker">今天就吃</p>
+      <p id="result-name" class="result-name" aria-live="polite"></p>
+      <p id="result-note" class="result-note" hidden></p>
+      <div class="result-actions">
+        <button id="reroll" class="btn" type="button">換一個</button>
+        <button id="accept" class="btn-accent" type="button">就吃這個</button>
+      </div>
+    </section>
+
+    <button id="clear" class="clear-btn" type="button">清空名單</button>
+  </main>
+
+  <noscript><p>請開啟 JavaScript 才能使用這個頁面。</p></noscript>
+
+  <script>
+    const STORAGE_KEY = "today-eat-what";
+
+    const form = document.querySelector("#add-form");
+    const addRow = document.querySelector("#add-row");
+    const nameInput = document.querySelector("#name");
+    const formError = document.querySelector("#form-error");
+    const listSection = document.querySelector("#list-section");
+    const listSummary = document.querySelector("#list-summary");
+    const list = document.querySelector("#list");
+    const pickerNote = document.querySelector("#picker-note");
+    const decideBtn = document.querySelector("#decide");
+    const result = document.querySelector("#result");
+    const resultKicker = document.querySelector("#result-kicker");
+    const resultName = document.querySelector("#result-name");
+    const resultNote = document.querySelector("#result-note");
+    const rerollBtn = document.querySelector("#reroll");
+    const acceptBtn = document.querySelector("#accept");
+    const clearBtn = document.querySelector("#clear");
+
+    let items = [];
+    let lastResultId = null;
+    let resultHint = "";
+    let popResult = false;
+    let composingEnter = false;
+    let addedByEnter = false;
+
+    function normalize(value) {
+      return String(value).replace(/^[\s\u3000]+|[\s\u3000]+$/g, "");
+    }
+
+    function uid() {
+      try {
+        const bytes = new Uint8Array(8);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+      } catch (error) {
+        return Date.now().toString(36) + Math.random().toString(36).slice(2);
+      }
+    }
+
+    function eligibleItems() {
+      return items.filter((item) => !item.skip);
+    }
+
+    function findItem(id) {
+      return items.find((item) => item.id === id) || null;
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || !Array.isArray(data.items)) return;
+        const seen = new Set();
+        items = data.items.filter((item) => {
+          if (!item || typeof item.id !== "string" || typeof item.name !== "string") return false;
+          const name = normalize(item.name);
+          if (!name || seen.has(item.id)) return false;
+          seen.add(item.id);
+          item.name = name;
+          item.skip = Boolean(item.skip);
+          item.eatenRecently = Boolean(item.eatenRecently);
+          return true;
+        });
+        lastResultId = typeof data.lastResultId === "string" ? data.lastResultId : null;
+        if (!findItem(lastResultId)) lastResultId = null;
+      } catch (error) {
+        items = [];
+        lastResultId = null;
+      }
+    }
+
+    function save() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          items: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            skip: item.skip,
+            eatenRecently: item.eatenRecently,
+          })),
+          lastResultId,
+        }));
+      } catch (error) {
+        formError.textContent = "這個瀏覽器沒有辦法保存名單。";
+      }
+    }
+
+    function showError(message) {
+      formError.textContent = "";
+      formError.textContent = message;
+      nameInput.setAttribute("aria-invalid", message ? "true" : "false");
+      addRow.classList.remove("shake");
+      if (!message) return;
+      void addRow.offsetWidth;
+      addRow.classList.add("shake");
+    }
+
+    function createItem(item) {
+      const li = document.createElement("li");
+      li.className = "item" + (item.skip ? " is-skip" : "");
+
+      const top = document.createElement("div");
+      top.className = "item-top";
+
+      const name = document.createElement("p");
+      name.className = "name";
+      name.textContent = item.name;
+      top.append(name);
+
+      if (item.skip || item.eatenRecently) {
+        const badges = document.createElement("div");
+        badges.className = "badges";
+        if (item.eatenRecently) {
+          const eaten = document.createElement("span");
+          eaten.className = "badge badge-eaten";
+          eaten.textContent = "最近吃過";
+          badges.append(eaten);
+        }
+        if (item.skip) {
+          const skipped = document.createElement("span");
+          skipped.className = "badge badge-skip";
+          skipped.textContent = "不想吃";
+          badges.append(skipped);
+        }
+        top.append(badges);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "item-actions";
+
+      const skipBtn = document.createElement("button");
+      skipBtn.type = "button";
+      skipBtn.className = "btn skip-btn";
+      skipBtn.dataset.action = "skip";
+      skipBtn.dataset.id = item.id;
+      skipBtn.setAttribute("aria-pressed", item.skip ? "true" : "false");
+      skipBtn.textContent = item.skip ? "取消不想吃" : "今天不想吃";
+      skipBtn.setAttribute("aria-label", (item.skip ? "取消不想吃 " : "今天不想吃 ") + item.name);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "btn remove-btn";
+      removeBtn.dataset.action = "remove";
+      removeBtn.dataset.id = item.id;
+      removeBtn.textContent = "移除";
+      removeBtn.setAttribute("aria-label", "移除 " + item.name);
+
+      actions.append(skipBtn, removeBtn);
+      li.append(top, actions);
+      return li;
+    }
+
+    function renderList() {
+      list.replaceChildren();
+      listSection.hidden = items.length === 0;
+      if (items.length === 0) return;
+      listSummary.textContent = "共 " + items.length + " 個，可抽 " + eligibleItems().length + " 個";
+      const fragment = document.createDocumentFragment();
+      for (const item of items) fragment.append(createItem(item));
+      list.append(fragment);
+    }
+
+    function renderPicker() {
+      if (items.length === 0) {
+        decideBtn.hidden = true;
+        pickerNote.hidden = false;
+        pickerNote.textContent = "先加入至少一個選項";
+        return;
+      }
+      if (eligibleItems().length === 0) {
+        decideBtn.hidden = true;
+        pickerNote.hidden = false;
+        pickerNote.textContent = "今天沒有可以吃的選項";
+        return;
+      }
+      decideBtn.hidden = false;
+      pickerNote.hidden = true;
+      pickerNote.textContent = "";
+    }
+
+    function renderResult() {
+      const current = findItem(lastResultId);
+      if (!current) {
+        result.hidden = true;
+        resultKicker.textContent = "今天就吃";
+        resultName.textContent = "";
+        resultNote.hidden = true;
+        resultNote.textContent = "";
+        return;
+      }
+
+      result.hidden = false;
+      resultName.textContent = current.name;
+
+      const accepted = Boolean(current.eatenRecently && current.skip);
+      const skippedOnly = current.skip && !current.eatenRecently;
+      let note = resultHint;
+      if (!note && accepted) note = "已記下，這項先不參加抽選。";
+      if (skippedOnly) note = "已標成今天不想吃，不會參加這次抽選。";
+
+      resultKicker.textContent = skippedOnly ? "這項先不抽" : "今天就吃";
+      resultNote.hidden = note === "";
+      resultNote.textContent = note;
+      acceptBtn.disabled = accepted || skippedOnly;
+      acceptBtn.textContent = accepted ? "已記下" : "就吃這個";
+
+      if (!popResult) return;
+      resultName.classList.remove("is-fresh");
+      void resultName.offsetWidth;
+      resultName.classList.add("is-fresh");
+      popResult = false;
+    }
+
+    function render() {
+      renderList();
+      renderPicker();
+      renderResult();
+    }
+
+    function commit(options) {
+      save();
+      render();
+      if (!options || !options.scrollResult) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      result.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      resultName.tabIndex = -1;
+      resultName.focus({ preventScroll: true });
+    }
+
+    function addFromInput() {
+      const name = normalize(nameInput.value);
+      if (!name) {
+        showError("請輸入店名或菜名");
+        nameInput.focus();
+        return;
+      }
+      if (items.some((item) => item.name === name)) {
+        showError("這個選項已經在名單裡");
+        nameInput.focus();
+        return;
+      }
+      showError("");
+      items.push({
+        id: uid(),
+        name,
+        skip: false,
+        eatenRecently: false,
+      });
+      nameInput.value = "";
+      commit();
+      nameInput.focus();
+    }
+
+    function toggleSkip(id) {
+      const item = findItem(id);
+      if (!item) return;
+      item.skip = !item.skip;
+      resultHint = "";
+      commit();
+    }
+
+    function removeItem(id) {
+      if (!findItem(id)) return;
+      items = items.filter((item) => item.id !== id);
+      if (lastResultId === id) {
+        lastResultId = null;
+        resultHint = "";
+      }
+      commit();
+    }
+
+    function pickFrom(pool) {
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function decide() {
+      const pool = eligibleItems();
+      if (pool.length === 0) return;
+      lastResultId = pickFrom(pool).id;
+      resultHint = "";
+      popResult = true;
+      commit({ scrollResult: true });
+    }
+
+    function reroll() {
+      if (!findItem(lastResultId)) return;
+      const others = eligibleItems().filter((item) => item.id !== lastResultId);
+      if (others.length === 0) {
+        const onlyCurrent = eligibleItems().length === 1 && eligibleItems()[0].id === lastResultId;
+        resultHint = onlyCurrent ? "目前只剩這個選項" : "今天沒有其他可以換的選項";
+        commit();
+        return;
+      }
+      lastResultId = pickFrom(others).id;
+      resultHint = "";
+      popResult = true;
+      commit({ scrollResult: true });
+    }
+
+    function acceptCurrent() {
+      const current = findItem(lastResultId);
+      if (!current || (current.eatenRecently && current.skip)) return;
+      for (const item of items) {
+        item.eatenRecently = item.id === current.id;
+        if (item.id === current.id) item.skip = true;
+      }
+      resultHint = "";
+      commit();
+    }
+
+    function clearAll() {
+      if (!confirm("確定要清空全部名單和抽選結果嗎？")) return;
+      items = [];
+      lastResultId = null;
+      resultHint = "";
+      showError("");
+      nameInput.value = "";
+      commit();
+    }
+
+    nameInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      if (event.isComposing || event.keyCode === 229) {
+        composingEnter = true;
+        return;
+      }
+      event.preventDefault();
+      if (event.repeat || addedByEnter) return;
+      addedByEnter = true;
+      addFromInput();
+      setTimeout(() => {
+        addedByEnter = false;
+      }, 0);
+    });
+
+    nameInput.addEventListener("keyup", () => {
+      composingEnter = false;
+    });
+
+    nameInput.addEventListener("input", () => {
+      if (formError.textContent) showError("");
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (composingEnter || addedByEnter) return;
+      addFromInput();
+    });
+
+    list.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button || !list.contains(button)) return;
+      if (button.dataset.action === "skip") toggleSkip(button.dataset.id);
+      if (button.dataset.action === "remove") removeItem(button.dataset.id);
+    });
+
+    decideBtn.addEventListener("click", decide);
+    rerollBtn.addEventListener("click", reroll);
+    acceptBtn.addEventListener("click", acceptCurrent);
+    clearBtn.addEventListener("click", clearAll);
+
+    load();
+    render();
+  </script>
+</body>
+</html>
